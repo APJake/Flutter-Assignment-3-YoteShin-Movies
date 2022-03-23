@@ -34,7 +34,7 @@ class CollectionDetail {
         name: json["name"],
         overview: json["overview"],
         posterPath: json["poster_path"],
-        backdropPath: json["backdrop_path"],
+        backdropPath: json["backdrop_path"] ?? "",
         parts: List<Movie>.from(json["parts"].map((x) => Movie.fromJson(x))),
       );
 

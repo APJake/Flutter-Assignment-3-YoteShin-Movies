@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:yoteshin_movies_asm/models/movie.dart';
 import 'package:yoteshin_movies_asm/networks/api.dart';
 import 'package:yoteshin_movies_asm/pages/detail_page.dart';
+import 'package:get/get.dart';
 
 import '../images/poster_image.dart';
 
@@ -17,12 +18,7 @@ class MovieItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DetailPage(tag: tag, movie: movie),
-          ),
-        );
+        Get.to(DetailPage(tag: tag, movie: movie));
       },
       child: SizedBox(
         width: width,

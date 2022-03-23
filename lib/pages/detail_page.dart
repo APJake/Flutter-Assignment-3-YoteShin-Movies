@@ -1,10 +1,8 @@
-import 'dart:ui';
-
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:yoteshin_movies_asm/components/images/poster_image.dart';
 import 'package:yoteshin_movies_asm/components/lists/moive_list.dart';
+import 'package:yoteshin_movies_asm/controllers/detail_controller.dart';
 import 'package:yoteshin_movies_asm/helper/use_me.dart';
 import 'package:yoteshin_movies_asm/models/cast.dart';
 import 'package:yoteshin_movies_asm/models/crew.dart';
@@ -28,70 +26,15 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
-  late YoutubePlayerController _controller;
-  List<Cast>? castList;
-  List<Crew>? crewList;
-  List<Video>? videoList;
-  List<Movie>? recommendationMovies, similarMovies;
-
-  loadCastList() {
-    API().getCasts(widget.movie.id).then((value) {
-      setState(() {
-        castList = value;
-      });
-    });
-  }
-
-  loadVideoList() {
-    API().getVideos(widget.movie.id).then((value) {
-      initController(value[0].key);
-      setState(() {
-        videoList = value;
-      });
-    });
-  }
-
-  loadCrewList() {
-    API().getCrews(widget.movie.id).then((value) {
-      setState(() {
-        crewList = value;
-      });
-    });
-  }
-
-  loadRecommendationMovies() {
-    API().getRecommendationMovies(widget.movie.id).then((value) {
-      setState(() {
-        recommendationMovies = value;
-      });
-    });
-  }
-
-  loadSimilarMovies() {
-    API().getSimilarMovies(widget.movie.id).then((value) {
-      setState(() {
-        similarMovies = value;
-      });
-    });
-  }
-
-  initController(key) {
-    _controller = YoutubePlayerController(
-      initialVideoId: key,
-      flags: const YoutubePlayerFlags(
-        autoPlay: false,
-        mute: false,
-      ),
-    );
-  }
+  final DetailController controller = DetailController();
 
   @override
   void initState() {
-    loadCastList();
-    loadCrewList();
-    loadVideoList();
-    loadSimilarMovies();
-    loadRecommendationMovies();
+    controller.loadCastList(widget.movie.id);
+    controller.loadCrewList(widget.movie.id);
+    controller.loadVideoList(widget.movie.id);
+    controller.loadSimilarMovies(widget.movie.id);
+    controller.loadRecommendationMovies(widget.movie.id);
     super.initState();
   }
 
@@ -100,16 +43,16 @@ class _DetailPageState extends State<DetailPage> {
       height: 260,
       child: CoverImage(imageUrl: API.imageURL400 + widget.movie.backdropPath));
 
-  Widget _castList() => castList == null
+  Widget _castList() => controller.castList.isEmpty
       ? const CircularProgressIndicator()
       : SizedBox(
           width: MediaQuery.of(context).size.width,
           height: 120,
           child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: castList!.length,
+              itemCount: controller.castList.length,
               itemBuilder: ((context, index) {
-                Cast cast = castList![index];
+                Cast cast = controller.castList[index];
                 return CastItem(
                   name: cast.name,
                   id: cast.id,
@@ -118,16 +61,16 @@ class _DetailPageState extends State<DetailPage> {
               })),
         );
 
-  Widget _crewList() => crewList == null
+  Widget _crewList() => controller.crewList.isEmpty
       ? const CircularProgressIndicator()
       : SizedBox(
           width: MediaQuery.of(context).size.width,
           height: 120,
           child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: crewList!.length,
+              itemCount: controller.crewList.length,
               itemBuilder: ((context, index) {
-                Crew crew = crewList![index];
+                Crew crew = controller.crewList[index];
                 return CastItem(
                   name: crew.name,
                   id: crew.id,
@@ -200,9 +143,10 @@ class _DetailPageState extends State<DetailPage> {
       );
 
   Widget _youtubePlayer(Video video) {
+    controller.initYoutubeController(video.key);
     return YoutubePlayerBuilder(
       player: YoutubePlayer(
-        controller: _controller,
+        controller: controller.youtubeController,
         showVideoProgressIndicator: true,
       ),
       builder: (context, player) => Column(
@@ -254,31 +198,35 @@ class _DetailPageState extends State<DetailPage> {
                 width: double.infinity,
                 child: Padding(
                   padding: const EdgeInsets.only(left: 20, right: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _movieInformation(),
-                      const SizedBox(height: 10),
-                      _readReviewsButton(),
-                      const SizedBox(height: 20),
-                      videoList != null && videoList!.isNotEmpty
-                          ? _youtubePlayer(UseMe.getTrailerVideo(videoList!))
-                          : Container(),
-                      _title("Cast"),
-                      _castList(),
-                      _title("Crew"),
-                      _crewList(),
-                      similarMovies == null
-                          ? const CircularProgressIndicator()
-                          : MovieList(
-                              title: "Similar", movieList: similarMovies!),
-                      recommendationMovies == null
-                          ? const CircularProgressIndicator()
-                          : MovieList(
-                              title: "Recommendation",
-                              movieList: recommendationMovies!),
-                      const SizedBox(height: 30),
-                    ],
+                  child: Obx(
+                    () => Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _movieInformation(),
+                        const SizedBox(height: 10),
+                        _readReviewsButton(),
+                        const SizedBox(height: 20),
+                        controller.videoList.isNotEmpty
+                            ? _youtubePlayer(
+                                UseMe.getTrailerVideo(controller.videoList))
+                            : Container(),
+                        _title("Cast"),
+                        _castList(),
+                        _title("Crew"),
+                        _crewList(),
+                        controller.similarMovies.isEmpty
+                            ? const CircularProgressIndicator()
+                            : MovieList(
+                                title: "Similar",
+                                movieList: controller.similarMovies),
+                        controller.recommendationMovies.isEmpty
+                            ? const CircularProgressIndicator()
+                            : MovieList(
+                                title: "Recommendation",
+                                movieList: controller.recommendationMovies),
+                        const SizedBox(height: 30),
+                      ],
+                    ),
                   ),
                 ),
               )

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:yoteshin_movies_asm/models/movie_collection.dart';
-import 'package:yoteshin_movies_asm/pages/collection_page.dart';
+import 'package:get/get.dart';
 
 import '../../networks/api.dart';
+import '../../pages/collection_page.dart';
 import '../images/poster_image.dart';
 
 class CollectionItem extends StatelessWidget {
@@ -13,13 +14,7 @@ class CollectionItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                CollectionPage(tag: "collection", collection: collection),
-          ),
-        );
+        Get.to(CollectionPage(tag: "collection", collection: collection));
       },
       child: SizedBox(
         child: Card(

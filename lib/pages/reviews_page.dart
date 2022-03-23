@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:yoteshin_movies_asm/components/lists/review_list.dart';
+import 'package:yoteshin_movies_asm/controllers/reviews_controller.dart';
 import 'package:yoteshin_movies_asm/helper/use_me.dart';
 import 'package:yoteshin_movies_asm/models/movie.dart';
-import 'package:yoteshin_movies_asm/models/review.dart';
-import 'package:yoteshin_movies_asm/networks/api.dart';
-
 import '../components/images/poster_image.dart';
 
 class ReviewsPage extends StatefulWidget {
@@ -16,19 +15,10 @@ class ReviewsPage extends StatefulWidget {
 }
 
 class _ReviewsPageState extends State<ReviewsPage> {
-  List<Review>? reviewList;
-
-  loadReviews() {
-    API().getReviews(widget.movie.id).then((value) {
-      setState(() {
-        reviewList = value;
-      });
-    });
-  }
-
+  ReviewsController controller = ReviewsController();
   @override
   void initState() {
-    loadReviews();
+    controller.loadReviews(widget.movie.id);
     super.initState();
   }
 
@@ -80,18 +70,20 @@ class _ReviewsPageState extends State<ReviewsPage> {
       appBar: AppBar(
         title: Text("Reviews - ${widget.movie.title}"),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            _movieProfile(),
-            const SizedBox(height: 20),
-            reviewList == null
-                ? const Center(child: CircularProgressIndicator())
-                : reviewList!.isEmpty
-                    ? const Center(child: Text("No reviews"))
-                    : ReviewList(reviewList: reviewList!),
-          ],
+      body: Obx(
+        () => SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+              _movieProfile(),
+              const SizedBox(height: 20),
+              controller.isLoading.value
+                  ? const Center(child: CircularProgressIndicator())
+                  : controller.reviewList.isEmpty
+                      ? const Center(child: Text("No reviews"))
+                      : ReviewList(reviewList: controller.reviewList),
+            ],
+          ),
         ),
       ),
     );

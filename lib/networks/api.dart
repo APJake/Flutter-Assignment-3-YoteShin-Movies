@@ -41,7 +41,7 @@ class API {
     return _getMovieList("/trending/movie/week");
   }
 
-  Future<List<Movie>> getNowPayingMovies() {
+  Future<List<Movie>> getNowPlayingMovies() {
     return _getMovieList("/movie/now_playing");
   }
 

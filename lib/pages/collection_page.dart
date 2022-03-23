@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:yoteshin_movies_asm/components/images/poster_image.dart';
-import 'package:yoteshin_movies_asm/components/items/movie_item.dart';
 import 'package:yoteshin_movies_asm/components/lists/moive_list.dart';
-import 'package:yoteshin_movies_asm/helper/use_me.dart';
-import 'package:yoteshin_movies_asm/models/collection_detail.dart';
-import 'package:yoteshin_movies_asm/models/movie.dart';
+import 'package:yoteshin_movies_asm/controllers/collection_controller.dart';
 import 'package:yoteshin_movies_asm/models/movie_collection.dart';
 
 import '../components/images/cover_image.dart';
@@ -21,20 +19,11 @@ class CollectionPage extends StatefulWidget {
 }
 
 class _CollectionPageState extends State<CollectionPage> {
-  CollectionDetail? detail;
-  API api = API();
-
-  loadCollectionDetail() {
-    api.getCollectionDetail(widget.collection.id).then((value) {
-      setState(() {
-        detail = value;
-      });
-    });
-  }
+  final CollectionController controller = CollectionController();
 
   @override
   void initState() {
-    loadCollectionDetail();
+    controller.loadCollectionDetail(widget.collection.id);
     super.initState();
   }
 
@@ -69,10 +58,10 @@ class _CollectionPageState extends State<CollectionPage> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 5),
-                detail == null
+                controller.detail.value == null
                     ? _loadingProgress()
                     : Text(
-                        "Total: ${detail!.parts.length}",
+                        "Total: ${controller.detail.value!.parts.length}",
                         style: const TextStyle(
                             fontSize: 12, fontStyle: FontStyle.italic),
                       ),
@@ -109,35 +98,39 @@ class _CollectionPageState extends State<CollectionPage> {
         title: Text(widget.collection.name),
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        child: Stack(
-          children: [
-            _coverImage(),
-            Container(
-              margin: const EdgeInsets.only(top: 160),
-              width: double.infinity,
-              padding: const EdgeInsets.only(left: 20, right: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _collectionHeader(),
-                  const SizedBox(height: 10),
-                  _title("Overview"),
-                  detail == null ? _loadingProgress() : Text(detail!.overview),
-                  const SizedBox(height: 10),
-                  detail == null
-                      ? _loadingProgress()
-                      : MovieList(
-                          title: "Movies",
-                          movieList: detail!.parts,
-                          height: 330,
-                          width: 180,
-                        ),
-                  const SizedBox(height: 50),
-                ],
-              ),
-            )
-          ],
+      body: Obx(
+        () => SingleChildScrollView(
+          child: Stack(
+            children: [
+              _coverImage(),
+              Container(
+                margin: const EdgeInsets.only(top: 160),
+                width: double.infinity,
+                padding: const EdgeInsets.only(left: 20, right: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _collectionHeader(),
+                    const SizedBox(height: 10),
+                    _title("Overview"),
+                    controller.detail.value == null
+                        ? _loadingProgress()
+                        : Text(controller.detail.value!.overview),
+                    const SizedBox(height: 10),
+                    controller.detail.value == null
+                        ? _loadingProgress()
+                        : MovieList(
+                            title: "Movies",
+                            movieList: controller.detail.value!.parts,
+                            height: 330,
+                            width: 180,
+                          ),
+                    const SizedBox(height: 50),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

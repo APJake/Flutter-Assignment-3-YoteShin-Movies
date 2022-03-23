@@ -1,44 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:yoteshin_movies_asm/components/items/collection_item.dart';
-import 'package:yoteshin_movies_asm/components/lists/search_list.dart';
+import 'package:yoteshin_movies_asm/controllers/search_controller.dart';
 import 'package:yoteshin_movies_asm/models/movie.dart';
 import 'package:yoteshin_movies_asm/models/movie_collection.dart';
-import 'package:yoteshin_movies_asm/networks/api.dart';
 
 import '../components/items/movie_item.dart';
 
 class SearchPage extends StatefulWidget {
-  SearchPage({Key? key}) : super(key: key);
+  const SearchPage({Key? key}) : super(key: key);
 
   @override
   State<SearchPage> createState() => _SearchPageState();
 }
 
 class _SearchPageState extends State<SearchPage> {
-  List<Movie>? movieList;
-  List<MovieCollection>? collectionList;
-  bool isSearching = false;
-  bool didSearched = false;
-  API api = API();
-
-  searchMovie(query) {
-    setState(() {
-      isSearching = true;
-      didSearched = true;
-    });
-    api.getSearchMovieCollections(query).then((value) {
-      setState(() {
-        collectionList = value;
-        isSearching = false;
-      });
-    });
-    api.getSearchMovies(query).then((value) {
-      setState(() {
-        movieList = value;
-        isSearching = false;
-      });
-    });
-  }
+  final SearchController controller = SearchController();
 
   Widget _movieSearchList() => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,9 +34,9 @@ class _SearchPageState extends State<SearchPage> {
                   crossAxisSpacing: 5,
                   childAspectRatio: 0.48,
                 ),
-                itemCount: movieList!.length,
+                itemCount: controller.movieList.length,
                 itemBuilder: (_, index) {
-                  Movie movie = movieList![index];
+                  Movie movie = controller.movieList[index];
                   return MovieItem(tag: "search", movie: movie);
                 }),
           ),
@@ -83,9 +60,9 @@ class _SearchPageState extends State<SearchPage> {
                   crossAxisSpacing: 5,
                   childAspectRatio: 0.52,
                 ),
-                itemCount: collectionList!.length,
+                itemCount: controller.collectionList.length,
                 itemBuilder: (_, index) {
-                  MovieCollection collection = collectionList![index];
+                  MovieCollection collection = controller.collectionList[index];
                   return CollectionItem(collection: collection);
                 }),
           ),
@@ -104,28 +81,30 @@ class _SearchPageState extends State<SearchPage> {
             hintText: "Search",
           ),
           onSubmitted: (value) {
-            searchMovie(value);
+            controller.searchMovie(value);
           },
         )),
-        body: SingleChildScrollView(
-          child: !didSearched
-              ? const SizedBox(
-                  height: 50, child: Center(child: Text("Search movies")))
-              : Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    collectionList == null
-                        ? isSearching
-                            ? const Center(child: CircularProgressIndicator())
-                            : Container()
-                        : _collectionSearchList(),
-                    movieList == null
-                        ? isSearching
-                            ? const Center(child: CircularProgressIndicator())
-                            : Container()
-                        : _movieSearchList(),
-                  ],
-                ),
+        body: Obx(
+          () => SingleChildScrollView(
+            child: !controller.didSearched.value
+                ? const SizedBox(
+                    height: 50, child: Center(child: Text("Search movies")))
+                : Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      controller.collectionList.isEmpty
+                          ? controller.isSearching.value
+                              ? const Center(child: CircularProgressIndicator())
+                              : Container()
+                          : _collectionSearchList(),
+                      controller.movieList.isEmpty
+                          ? controller.isSearching.value
+                              ? const Center(child: CircularProgressIndicator())
+                              : Container()
+                          : _movieSearchList(),
+                    ],
+                  ),
+          ),
         ));
   }
 }
