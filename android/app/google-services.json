@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "21678438177",
+    "project_id": "fir-yoteshin",
+    "storage_bucket": "fir-yoteshin.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:21678438177:android:5345f2aa2f3c019b9f3060",
+        "android_client_info": {
+          "package_name": "com.example.yoteshin.movies.asm"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "21678438177-uc0h1lq30e05sf8p92eqgnsf2hp4td7q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.yoteshin.movies.asm",
+            "certificate_hash": "0310c16596affc6c1e62eac22e0febc956e2b9e0"
+          }
+        },
+        {
+          "client_id": "21678438177-ob32amfu4ju1obatg6b35v61ip48kag3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCw7OJedjEDDLtj-MkEiRh18wMoEyg5nLs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "21678438177-ob32amfu4ju1obatg6b35v61ip48kag3.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "21678438177-9t5nfatd4ljnrrcpesm6cvj1bhd789ev.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.yoteshinMoviesAsm"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

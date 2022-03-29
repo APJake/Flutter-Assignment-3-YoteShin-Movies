@@ -8,7 +8,12 @@ class HomeController extends GetxController {
   RxList<Movie> nowPlayingMovies = <Movie>[].obs;
   RxList<Movie> upcomingMovies = <Movie>[].obs;
   RxList<Movie> trendingMovies = <Movie>[].obs;
+  RxBool isSigningOut = false.obs;
   final API api = API();
+
+  void makeSigningOut() {
+    isSigningOut = true.obs;
+  }
 
   void loadPopularMovies() {
     api.getPopularMovies().then((value) {
